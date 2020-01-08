@@ -334,6 +334,19 @@ public class JuegoAhorcado {
 	static void cargaPalabras() {
 
 		InputStream is = JuegoAhorcado.class.getResourceAsStream("/palabras.txt");
+		
+		/* Otra forma de obtener referencia al ficnero de recurso. Es decir, de hacer lo mismo de arriba
+		 ClassLoader loader = JuegoAhorcado.class.getClassLoader();
+		
+		InputStream is=null;
+		try {
+			is = loader.getResource("palabras.txt").openStream();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		*/
+		
 		if (is != null) {
 			palabras = new ArrayList<>();
 			Scanner sc = new Scanner(is);
