@@ -53,10 +53,6 @@ public class JuegoAhorcado {
 
 	static ArrayList<String> palabras;
 
-	// static final String[] PALABRAS = {"ORDENADOR", "CONFEDERACION",
-	// "ALTAVOZ","TIBURON","CONSTELACION","MOTOCICLETA",
-	// "ESTRATIFICACION","REPRESENTANTE","FUNCIONALIDAD","POLIMORFISMO","EXPERIMENTACION","ESQUELETO","FUNICULAR"};
-
 	static String palabraADescubrir; // Palabra a descubrir.
 
 	// Palabra en construcción. Array donde se irá construyendo la palabra a medida
@@ -81,32 +77,27 @@ public class JuegoAhorcado {
 
 	public static void main(String[] args) {
 		
-		// Creamos scanner si le damos charset como parametro lo utiliza en vez del de por defecto
+		letrasUtilizadas = new TreeSet<>(); // Crea colección para guardar letras utilizadas.
+		
+		// Crea scanner si le damos charset como parametro lo utiliza en vez del de por defecto
 		
 		if(args.length > 0)
 			sc = new Scanner(System.in,args[0]);
 		else 
 			sc = new Scanner(System.in);
 
-		// Carga lista de palabras desde el fichero de recurso
+		cargaPalabras();    // Carga lista de palabras desde el fichero de recurso
 
-		cargaPalabras();
+		// Crea una nueva partida.(Pinta horca inicial y patrón (huecos) 
+		// de la palabra a descubrir, inicializa contadores,  ...)
+		
+		nuevaPartida(); 
 
-		palabraADescubrir = damePalabra(); // Palabra aleatoria de entre las existentes en PALABRAS.
-
-		palabraEnConstruccion = new char[palabraADescubrir.length()]; // Se irán añadiendo letras coincidentes
-																		// suministradas por usuario.
-
-		letrasUtilizadas = new TreeSet<>(); // Crea colección para guardar letras utilizadas.
-
-		letra = '_'; // Caracter a guardar en palabraEnConstruccion[i] cuando la letra de la posición
-						// i aun no ha sido suministrada.
-
-		nuevaPartida(); // Crea una nueva partida.(Pinta horca inicial y patrón (huecos) de la palabra a
-						// descubrir ...)
-
-		for (;;) { // Bucle sin condición de parada ni contadores. También se puede poner while
-					// (true){
+		
+		// Bucle sin condición de parada ni contadores. 
+		// También se puede poner while (true)
+		
+		for (;;) { 
 
 			letra = pideLetra("Escribe la letra: "); // Pide letra por consola.
 
@@ -183,8 +174,7 @@ public class JuegoAhorcado {
 		inicializaPalADescubrir();  // Rellena palabraEnConstrucción con '_'.
 		letrasUtilizadas.clear(); // Limpia colección de letras utilizadas.
 		letra = '_';
-		contFallos = 0;
-		contTiradas = 0;
+		contFallos = contTiradas = 0;
 		pintaPalabraEnConstruccion();
 		pintaHorca(0);
 		pintaContadoresVidasYTiradas();
@@ -195,8 +185,8 @@ public class JuegoAhorcado {
 	 * caso de haber agotado el número de intentos o haber completado la palabra
 	 * respectivamente.
 	 * 
-	 * @return true en caso de que la partida haya terminado, bien por derrota o
-	 *         victoria false en caso contrario (la partida continua).
+	 * @return true en caso de que la partida haya terminado, bien por derrota o victoria.
+	 *         false en caso contrario (la partida continua).
 	 */
 	private static boolean partidaTerminada() {
 		if (!acierto && contFallos == MAX_FALLOS) {
@@ -220,6 +210,8 @@ public class JuegoAhorcado {
 	private static char pideLetra(String t) {
 		System.out.print(t);
 		sc.reset();
+		// Si por error teclamos mas de una letra consecutiva, solo coje la primera, 
+		//y la convierte a mayuscula
 		char c = sc.next().toUpperCase().charAt(0);
 			
 		return c;
@@ -240,7 +232,7 @@ public class JuegoAhorcado {
 
 		if (!letrasUtilizadas.contains(letra)) { // Si la letra aun no ha sido utilizada
 
-			// Mete en array palabraEnConstruccion los caracteres coincidentes en			// palabraADescubrir
+			// Mete en array palabraEnConstruccion los caracteres coincidentes en palabraADescubrir
 
 			for (int i = 0; i < palabraADescubrir.length(); i++) {
 				if (palabraADescubrir.charAt(i) == letra) { // Si la letra está en palabraADescubrir
@@ -256,7 +248,7 @@ public class JuegoAhorcado {
 			acierto = true; // si letra ya fue usada no se computa error ni tirada.
 		}
 
-		return acierto; // Número de caracteres coincidentes añadidos a palabra.
+		return acierto; 
 
 	}
 
@@ -266,7 +258,7 @@ public class JuegoAhorcado {
 	}
 
 	private static void pintaContadoresVidasYTiradas() {
-		System.out.printf("Tiradas: %d\tVidas: %d\n", contTiradas, MAX_FALLOS - contFallos);
+		System.out.printf("Tiradas: %d\tVidas restantes: %d\n", contTiradas, MAX_FALLOS - contFallos);
 	}
 
 	private static void pintaPalabraEnConstruccion() {
