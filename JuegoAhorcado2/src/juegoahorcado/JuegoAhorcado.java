@@ -3,9 +3,11 @@ package juegoahorcado;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.TreeSet;
 
+import com.sun.org.apache.bcel.internal.generic.NEW;
 
 public class JuegoAhorcado {
 
@@ -18,7 +20,7 @@ public class JuegoAhorcado {
 	// una sola línea:
 	// " +---+ \n | | \n | \n | \n | \n | \n=========\n"
 
-	private static final String[] IMAGENES_AHORCADO = {
+	private static  String[] imagenesAhorcado = {
 			// primera horca
 			"  +---+  \n" + "  |   |  \n" + "      |  \n" + "      |  \n" + "      |  \n" + "      |  \n"
 					+ "=========\n",
@@ -45,11 +47,12 @@ public class JuegoAhorcado {
 
 			"         \n" + "  +---+  \n" + "  |   |  \n" + "  O   |  \n" + " /|\\  |  \n" + " / \\  |  \n"
 					+ "      |  \n" + "=========\n" };
-
 	
-	static Scanner sc; 
+	static final char [] saltos = new char[200];
 
-	static final int MAX_FALLOS = IMAGENES_AHORCADO.length - 1;
+	static Scanner sc;
+
+	static final int MAX_FALLOS = imagenesAhorcado.length - 1;
 
 	static ArrayList<String> palabras;
 
@@ -71,33 +74,37 @@ public class JuegoAhorcado {
 	static int contFallos = 0; // Contador de fallos. Se incrementa por cada letra suministrada que no
 								// existenta en la palabra a descubrir.
 	static int contTiradas = 0; // Contador del número de tiradas (letras suministradas) en la partida.
-	static boolean acierto;   // Indica si una jugada a sido existosa o no. 
+	static boolean acierto; // Indica si una jugada a sido existosa o no.
 
 	static char letra; // Letra a comprobar si existe en palabraADescrubrir .
 
 	public static void main(String[] args) {
-		
+
 		letrasUtilizadas = new TreeSet<>(); // Crea colección para guardar letras utilizadas.
-		
-		// Crea scanner si le damos charset como parametro lo utiliza en vez del de por defecto
-		
-		if(args.length > 0)
-			sc = new Scanner(System.in,args[0]);
-		else 
+
+		// Crea scanner si le damos charset como parametro lo utiliza en vez del de por
+		// defecto
+
+		if (args.length > 0)
+			sc = new Scanner(System.in, args[0]);
+		else
 			sc = new Scanner(System.in);
-
-		cargaPalabras();    // Carga lista de palabras desde el fichero de recurso
-
-		// Crea una nueva partida.(Pinta horca inicial y patrón (huecos) 
-		// de la palabra a descubrir, inicializa contadores,  ...)
 		
-		nuevaPartida(); 
+		// Utilizamos para escribir 200 saltos de linea por consola y simular así
+		// que la hemos borrado. Lo haremos en cada tirada para reescribir el contenido mostrado.
+		Arrays.fill(saltos, '\n');  // Llena array con saltos de linea.
 
-		
-		// Bucle sin condición de parada ni contadores. 
+		cargaPalabras(); // Carga lista de palabras desde el fichero de recurso
+
+		// Crea una nueva partida.(Pinta horca inicial y patrón (huecos)
+		// de la palabra a descubrir, inicializa contadores, ...)
+
+		nuevaPartida();
+
+		// Bucle sin condición de parada ni contadores.
 		// También se puede poner while (true)
-		
-		for (;;) { 
+
+		for (;;) {
 
 			letra = pideLetra("Escribe la letra: "); // Pide letra por consola.
 
@@ -110,13 +117,14 @@ public class JuegoAhorcado {
 
 			// Comprueba ocurencias de la letra en la palabra a descubrir, las añade a la
 			// palabra en construcción,
-			// pinta la palabra en construcción actualizada y devuelve número de aciertos
-			// (ocurrencias de la letra).
+			// pinta la palabra en construcción actualizada y devuelve verdadero si la letra
+			// de la jugada existe en la palabra a descubrir
+
 			acierto = hazJugada();
 
 			// Si letra no está en la palabra a descubrir incrementa contador de fallos.
-			contFallos = acierto  ? contFallos : contFallos + 1;
-			
+			contFallos = acierto ? contFallos : contFallos + 1;
+
 			pintaPalabraEnConstruccion();
 
 			pintaHorca(contFallos); // Repinta horca según número de fallos.
@@ -171,7 +179,7 @@ public class JuegoAhorcado {
 		borraConsola();
 		palabraADescubrir = damePalabra();
 		palabraEnConstruccion = new char[palabraADescubrir.length()];
-		inicializaPalADescubrir();  // Rellena palabraEnConstrucción con '_'.
+		inicializaPalADescubrir(); // Rellena palabraEnConstrucción con '_'.
 		letrasUtilizadas.clear(); // Limpia colección de letras utilizadas.
 		letra = '_';
 		contFallos = contTiradas = 0;
@@ -185,8 +193,8 @@ public class JuegoAhorcado {
 	 * caso de haber agotado el número de intentos o haber completado la palabra
 	 * respectivamente.
 	 * 
-	 * @return true en caso de que la partida haya terminado, bien por derrota o victoria.
-	 *         false en caso contrario (la partida continua).
+	 * @return true en caso de que la partida haya terminado, bien por derrota o
+	 *         victoria. false en caso contrario (la partida continua).
 	 */
 	private static boolean partidaTerminada() {
 		if (!acierto && contFallos == MAX_FALLOS) {
@@ -210,10 +218,10 @@ public class JuegoAhorcado {
 	private static char pideLetra(String t) {
 		System.out.print(t);
 		sc.reset();
-		// Si por error teclamos mas de una letra consecutiva, solo coje la primera, 
-		//y la convierte a mayuscula
+		// Si por error teclamos mas de una letra consecutiva, solo coje la primera,
+		// y la convierte a mayuscula
 		char c = sc.next().toUpperCase().charAt(0);
-			
+
 		return c;
 	}
 
@@ -223,32 +231,29 @@ public class JuegoAhorcado {
 	 * por consola.
 	 * 
 	 * 
-	 * @return true si letra está en palabraADescubrir o si letra está en palabrasUtilizadas
-	 *         false en otro caso.
+	 * @return true si letra está en palabraADescubrir o si letra está en palabrasUtilizadas 
+	 *         false en otro caso
 	 */
 
 	private static boolean hazJugada() {
 		boolean acierto = false;
-
-		if (!letrasUtilizadas.contains(letra)) { // Si la letra aun no ha sido utilizada
-
-			// Mete en array palabraEnConstruccion los caracteres coincidentes en palabraADescubrir
-
-			for (int i = 0; i < palabraADescubrir.length(); i++) {
-				if (palabraADescubrir.charAt(i) == letra) { // Si la letra está en palabraADescubrir
-					palabraEnConstruccion[i] = letra; // Añade letra al array palabraEnConstruccion.
-					acierto = true;
-				}
-			}
-
-			letrasUtilizadas.add(letra); // Añade letra utilizada a la colección.
-			contTiradas++;
 		
-		} else {
-			acierto = true; // si letra ya fue usada no se computa error ni tirada.
+		// Si la letra ya ha sido utilizada no hace nada y devuelve true
+		if (letrasUtilizadas.contains(letra)) 
+			return true;
+
+		// Pone en palabraEnConstruccion los caracteres coincidentes en palabraADescubrir
+
+		for (int i = 0; i < palabraADescubrir.length(); i++) {
+			if (palabraADescubrir.charAt(i) == letra) {	// Si la letra está en palabraADescubrir
+				palabraEnConstruccion[i] = letra; 		// la añade a palabraEnConstruccion
+				acierto = true;							// ha habido acierto
+			}
 		}
 
-		return acierto; 
+		letrasUtilizadas.add(letra); // Añade letra utilizada a la colección.
+		contTiradas++;
+		return acierto;
 
 	}
 
@@ -269,8 +274,7 @@ public class JuegoAhorcado {
 	}
 
 	private static void pintaHorca(int i) {
-		System.out.println(IMAGENES_AHORCADO[i]);
-
+		System.out.println(imagenesAhorcado[i]);
 	}
 
 	/**
@@ -278,16 +282,7 @@ public class JuegoAhorcado {
 	 */
 	private static void borraConsola() {
 
-		// Versión para borrar consola MS-DOS
-		/*
-		 * try { new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor(); }
-		 * catch (InterruptedException | IOException e) { e.printStackTrace(); }
-		 */
-
-		// Para consola Eclipse. Simula borrado metiendo líneas en blanco.
-		for (int i = 0; i < 200; i++) {
-			System.out.println();
-		}
+			System.out.print(saltos);
 	}
 
 	/**
@@ -326,19 +321,16 @@ public class JuegoAhorcado {
 	static void cargaPalabras() {
 
 		InputStream is = JuegoAhorcado.class.getResourceAsStream("/palabras.txt");
-		
-		/* Otra forma de obtener referencia al ficnero de recurso. Es decir, de hacer lo mismo de arriba
-		 ClassLoader loader = JuegoAhorcado.class.getClassLoader();
-		
-		InputStream is=null;
-		try {
-			is = loader.getResource("palabras.txt").openStream();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		*/
-		
+
+		/*
+		 * Otra forma de obtener referencia al ficnero de recurso. Es decir, de hacer lo
+		 * mismo de arriba ClassLoader loader = JuegoAhorcado.class.getClassLoader();
+		 * 
+		 * InputStream is=null; try { is =
+		 * loader.getResource("palabras.txt").openStream(); } catch (IOException e) { //
+		 * TODO Auto-generated catch block e.printStackTrace(); }
+		 */
+
 		if (is != null) {
 			palabras = new ArrayList<>();
 			Scanner sc = new Scanner(is);
