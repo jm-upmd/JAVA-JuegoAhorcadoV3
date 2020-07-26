@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Scanner;
 import java.util.TreeSet;
 
-import com.sun.org.apache.bcel.internal.generic.NEW;
 
 public class JuegoAhorcado {
 
@@ -19,40 +18,20 @@ public class JuegoAhorcado {
 	// Por ejemplo, la primera horca podría representarse con el siguiente string en
 	// una sola línea:
 	// " +---+ \n | | \n | \n | \n | \n | \n=========\n"
-
-	private static  String[] imagenesAhorcado = {
-			// primera horca
-			"  +---+  \n" + "  |   |  \n" + "      |  \n" + "      |  \n" + "      |  \n" + "      |  \n"
-					+ "=========\n",
-			// segunda horca
-			"         \n" + "  +---+  \n" + "  |   |  \n" + "  O   |  \n" + "      |  \n" + "      |  \n"
-					+ "      |  \n" + "=========\n",
-			// tercera horca
-			"         \n" + "  +---+  \n" + "  |   |  \n" + "  O   |  \n" + "  |   |  \n" + "      |  \n"
-					+ "      |  \n" + "=========\n",
-
-			"         \n" + "  +---+  \n" + "  |   |  \n" + "  O   |  \n" + " /|   |  \n" + "      |  \n"
-					+ "      |  \n" + "=========\n",
-
-			"         \n" + "  +---+  \n" + "  |   |  \n" + "  O   |  \n" + " /|\\  |  \n" + // caracter de barra
-																								// invertida \ hay que
-																								// duplicarlo para que
-																								// lo interprete como
-																								// caracter literal y no
-																								// de escape.
-					"      |  \n" + "      |  \n" + "=========\n",
-
-			"         \n" + "  +---+  \n" + "  |   |  \n" + "  O   |  \n" + " /|\\  |  \n" + " /    |  \n"
-					+ "      |  \n" + "=========\n",
-
-			"         \n" + "  +---+  \n" + "  |   |  \n" + "  O   |  \n" + " /|\\  |  \n" + " / \\  |  \n"
-					+ "      |  \n" + "=========\n" };
 	
-	static final char [] saltos = new char[200];
+	/* PROPUESTA DE MEJORA
+	 * Extraer estos string a un fichero de texto externo y cargar el array a partir
+	 * de él. Así no "ensuciamos" el códgo y lo podemos manejar mejor las cadenas 
+	 * sobre el fichero con un editor de texto de forma independiente.
+	 */
+
+	static final int MAX_FALLOS = 6;
+	
+	private static String[] imagenesAhorcado = new String[MAX_FALLOS + 1]; 
+
+	static final char[] saltos = new char[200];
 
 	static Scanner sc;
-
-	static final int MAX_FALLOS = imagenesAhorcado.length - 1;
 
 	static ArrayList<String> palabras;
 
@@ -89,10 +68,13 @@ public class JuegoAhorcado {
 			sc = new Scanner(System.in, args[0]);
 		else
 			sc = new Scanner(System.in);
-		
+
 		// Utilizamos para escribir 200 saltos de linea por consola y simular así
-		// que la hemos borrado. Lo haremos en cada tirada para reescribir el contenido mostrado.
-		Arrays.fill(saltos, '\n');  // Llena array con saltos de linea.
+		// que la hemos borrado. Lo haremos en cada tirada para reescribir el contenido
+		// mostrado.
+		Arrays.fill(saltos, '\n'); // Llena array con saltos de linea.
+		
+		cargaMapasHorcas();
 
 		cargaPalabras(); // Carga lista de palabras desde el fichero de recurso
 
@@ -113,38 +95,16 @@ public class JuegoAhorcado {
 				continue; // Salta al comienzo del bucle.
 			}
 
-			borraConsola();
-
 			// Comprueba ocurencias de la letra en la palabra a descubrir, las añade a la
 			// palabra en construcción,
 			// pinta la palabra en construcción actualizada y devuelve verdadero si la letra
 			// de la jugada existe en la palabra a descubrir
 
-			acierto = hazJugada();
-
-			// Si letra no está en la palabra a descubrir incrementa contador de fallos.
-			contFallos = acierto ? contFallos : contFallos + 1;
-
-			pintaPalabraEnConstruccion();
-
-			pintaHorca(contFallos); // Repinta horca según número de fallos.
-
-			pintaContadoresVidasYTiradas();
-
-			pintaListaLetrasUsadas();
-
-			// partidaTerminada() evalua si se ha llegado al total de fallos o se ha
-			// completado la palabra.
-			// En ambos casos la partida se da por terminada y escribe el mensaje de
-			// victoria o derrota por consola,
-			// y devuelve true indicando fin de la partida.
-			// Si no se da ninguna de las condiciones anteriores devuelve false para seguir
-			// pidiendo letras
-			// en la partida en curso
+			hazJugada();
 
 			if (partidaTerminada()) { // Si la partida ha terminado preguntamos si quiere jugar otra
 				// Pregunta por consola si jugar otra partida
-				if (!jugarOtraPartida("\n¿Quieres jugar otra partida? [S/N]: "))
+				if (!jugarOtraPartida())
 					break; // Si no se quiere jugar otra partida entonces sale del bucle while
 			}
 
@@ -161,8 +121,8 @@ public class JuegoAhorcado {
 	 * 
 	 * @return 0 si hemos pulsado S para jugar otra partida; -1 en caso contrario
 	 */
-	private static boolean jugarOtraPartida(String t) {
-		if (pideLetra(t) == 'S') {
+	private static boolean jugarOtraPartida() {
+		if (pideLetra("\n¿Quieres jugar otra partida? [S/N]: ") == 'S') {
 			nuevaPartida();
 			return true;
 		} else
@@ -226,35 +186,44 @@ public class JuegoAhorcado {
 	}
 
 	/**
-	 * Añade la letra a palabra, siempre que esta esté presente en PALABRA. La letra
-	 * es añadida en la misma posición que se encuentra en PALABRA. Escribre palabra
-	 * por consola.
+	 * Si la letra esta en palabraADescubrir la incluye en palabraEnConstruccion
+	 * y la añade a letrasUtilizadas.
+	 * Si la letra no está en palabraADescubir incrementa el contador de fallos
+	 * Incrementa contador de tiradas.
+	 * Repinta consola con los nuevos valores: contadores, horca, letras usadas
 	 * 
-	 * 
-	 * @return true si letra está en palabraADescubrir o si letra está en palabrasUtilizadas 
-	 *         false en otro caso
 	 */
 
-	private static boolean hazJugada() {
+	private static  void hazJugada() {
 		boolean acierto = false;
-		
-		// Si la letra ya ha sido utilizada no hace nada y devuelve true
-		if (letrasUtilizadas.contains(letra)) 
-			return true;
 
-		// Pone en palabraEnConstruccion los caracteres coincidentes en palabraADescubrir
+		// Si la letra ya  ha sido utilizada no hace nada, solo repinta consola 
+		if (!letrasUtilizadas.contains(letra)) {
 
-		for (int i = 0; i < palabraADescubrir.length(); i++) {
-			if (palabraADescubrir.charAt(i) == letra) {	// Si la letra está en palabraADescubrir
-				palabraEnConstruccion[i] = letra; 		// la añade a palabraEnConstruccion
-				acierto = true;							// ha habido acierto
+			// Pone en palabraEnConstruccion los caracteres coincidentes en
+			// palabraADescubrir
+
+			for (int i = 0; i < palabraADescubrir.length(); i++) {
+				if (palabraADescubrir.charAt(i) == letra) { // Si la letra está en palabraADescubrir
+					palabraEnConstruccion[i] = letra; // la añade a palabraEnConstruccion
+					acierto = true; // ha habido acierto
+				}
 			}
+
+			letrasUtilizadas.add(letra); // Añade letra utilizada a la colección.
+			contTiradas++;
+
+			// Si letra no está en la palabra a descubrir incrementa contador de fallos.
+			contFallos = acierto ? contFallos : contFallos + 1;
 		}
 
-		letrasUtilizadas.add(letra); // Añade letra utilizada a la colección.
-		contTiradas++;
-		return acierto;
+		borraConsola();
+		pintaPalabraEnConstruccion();
+		pintaHorca(contFallos); // Repinta horca según número de fallos.
+		pintaContadoresVidasYTiradas();
+		pintaListaLetrasUsadas();
 
+		
 	}
 
 	static private void inicializaPalADescubrir() {
@@ -282,7 +251,7 @@ public class JuegoAhorcado {
 	 */
 	private static void borraConsola() {
 
-			System.out.print(saltos);
+		System.out.print(saltos);
 	}
 
 	/**
@@ -323,12 +292,15 @@ public class JuegoAhorcado {
 		InputStream is = JuegoAhorcado.class.getResourceAsStream("/palabras.txt");
 
 		/*
-		 * Otra forma de obtener referencia al ficnero de recurso. Es decir, de hacer lo
-		 * mismo de arriba ClassLoader loader = JuegoAhorcado.class.getClassLoader();
+		 * Otra forma de obtener referencia al ficnero de recurso. Es decir, de hacer lo mismo de arriba 
 		 * 
-		 * InputStream is=null; try { is =
-		 * loader.getResource("palabras.txt").openStream(); } catch (IOException e) { //
-		 * TODO Auto-generated catch block e.printStackTrace(); }
+		 * ClassLoader loader = JuegoAhorcado.class.getClassLoader();
+		 * InputStream is=null; 
+		 * try { 
+		 * 	is = loader.getResource("palabras.txt").openStream(); 
+		 * } catch (IOException e) { 
+		 * 	e.printStackTrace(); 
+		 * }
 		 */
 
 		if (is != null) {
@@ -341,6 +313,40 @@ public class JuegoAhorcado {
 			sc.close();
 		} else {
 			System.out.println("Fichro de recurso no existe o no se puede abrir: palabras.txt");
+		}
+
+	}
+	
+	static void cargaMapasHorcas() {
+		InputStream is = JuegoAhorcado.class.getResourceAsStream("/mapas_horcas.txt");
+		if (is != null) {
+
+			Scanner sc = new Scanner(is);
+			StringBuilder linea = new StringBuilder();
+			String str;
+			int i = -1; // pos del array de horcas
+
+			while (sc.hasNextLine()) {
+				str = sc.nextLine();
+				
+				if (str.length() == 0) continue;
+
+				if (str.charAt(0) == '@') {
+					if(i != -1) {
+						imagenesAhorcado[i] = linea.toString();
+						linea.setLength(0);
+					}
+					
+					i++;
+				} else {
+					linea.append(str).append('\n');
+				}
+			}
+			imagenesAhorcado[i] = linea.toString();
+
+			sc.close();
+		} else {
+			System.out.println("Fichro de recurso no existe o no se puede abrir: mapas_horcas.txt");
 		}
 
 	}
