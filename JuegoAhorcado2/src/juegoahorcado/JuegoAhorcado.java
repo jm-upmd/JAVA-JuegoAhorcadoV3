@@ -53,12 +53,7 @@ public class JuegoAhorcado {
 			sc = new Scanner(System.in, args[0]);
 		else
 			sc = new Scanner(System.in);
-
-		// Utilizamos para escribir 200 saltos de linea por consola y simular así
-		// que la hemos borrado. Lo haremos en cada tirada para reescribir el contenido
-		// mostrado.
-		Arrays.fill(saltos, '\n'); // Llena array con saltos de linea.
-		
+	
 		cargaMapasHorcas(); // Carga los strings conlas horcas desde el fichero de recurso.
 
 		cargaPalabras(); // Carga lista de palabras desde el fichero de recurso
@@ -106,10 +101,9 @@ public class JuegoAhorcado {
 	 * @return true si hemos pulsado S para jugar otra partida; false en caso contrario
 	 */
 	private static boolean jugarOtraPartida() {
-		if (pideLetra("\n¿Quieres jugar otra partida? [S/N]: ") == 'S') {
-			return true;
-		} else
-			return false;
+		
+		return pideLetra("\n¿Quieres jugar otra partida? [S/N]: ") == 'S';
+
 	}
 
 	/**
@@ -232,8 +226,8 @@ public class JuegoAhorcado {
 	 * Escribe 200 líneas en blanco para simular un borrado de consola
 	 */
 	private static void borraConsola() {
-
-		System.out.print(saltos);
+		for(int i=1; i<= 200; i++)
+			System.out.println();
 	}
 
 	/**
