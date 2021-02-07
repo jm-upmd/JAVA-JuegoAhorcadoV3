@@ -10,21 +10,6 @@ import java.util.TreeSet;
 
 public class JuegoAhorcado {
 
-	// Array de strings. Cada string representa un estado de la horca pintada con
-	// caracteres.
-	// Cada string de cada dibujo de la horca se ha escrito en varivas líneas
-	// concatenadas para que
-	// visualmente sea más legible el patrón de dibujo que representan.
-	// Por ejemplo, la primera horca podría representarse con el siguiente string en
-	// una sola línea:
-	// " +---+ \n | | \n | \n | \n | \n | \n=========\n"
-	
-	/* PROPUESTA DE MEJORA
-	 * Extraer estos string a un fichero de texto externo y cargar el array a partir
-	 * de él. Así no "ensuciamos" el códgo y lo podemos manejar mejor las cadenas 
-	 * sobre el fichero con un editor de texto de forma independiente.
-	 */
-
 	static final int MAX_FALLOS = 6;
 	
 	private static String[] imagenesAhorcado = new String[MAX_FALLOS + 1]; 
@@ -44,7 +29,7 @@ public class JuegoAhorcado {
 	// Colección para almacenar las letras ya usadas y mostrarlas en la partida.
 	// Usamos una TreeSet porque no almacena duplicados y además ordena los
 	// elementos.
-	// En el caso de guardar Characters los ordena alfabéticamente por defectro.
+	// En el caso de guardar Characters los ordena alfabéticamente por defecto.
 	// Ojo, por defecto no ordena bien la 'ñ' . Habría que usar un objeto Comparator
 	// para establecer el orden correcto (eso lo veremos más adelante)
 
@@ -55,7 +40,7 @@ public class JuegoAhorcado {
 	static int contTiradas = 0; // Contador del número de tiradas (letras suministradas) en la partida.
 	static boolean acierto; // Indica si una jugada a sido existosa o no.
 
-	static char letra; // Letra a comprobar si existe en palabraADescrubrir .
+	static char letra; // Letra a comprobar si existe en palabraADescrubrir.
 
 	public static void main(String[] args) {
 
@@ -74,7 +59,7 @@ public class JuegoAhorcado {
 		// mostrado.
 		Arrays.fill(saltos, '\n'); // Llena array con saltos de linea.
 		
-		cargaMapasHorcas();
+		cargaMapasHorcas(); // Carga los strings conlas horcas desde el fichero de recurso.
 
 		cargaPalabras(); // Carga lista de palabras desde el fichero de recurso
 
@@ -87,7 +72,7 @@ public class JuegoAhorcado {
 		// También se puede poner while (true)
 
 		for (;;) {
-
+	
 			letra = pideLetra("Escribe la letra: "); // Pide letra por consola.
 
 			if (!letraPermitida(letra)) {
@@ -96,16 +81,15 @@ public class JuegoAhorcado {
 			}
 
 			// Comprueba ocurencias de la letra en la palabra a descubrir, las añade a la
-			// palabra en construcción,
-			// pinta la palabra en construcción actualizada y devuelve verdadero si la letra
-			// de la jugada existe en la palabra a descubrir
+			// palabra en construcción, pinta la palabra en construcción y actualiza
+			// contadores en función de si la jugada a sido exitosa o no.
 
 			hazJugada();
 
-			if (partidaTerminada()) { // Si la partida ha terminado preguntamos si quiere jugar otra
-				// Pregunta por consola si jugar otra partida
-				if (!jugarOtraPartida())
-					break; // Si no se quiere jugar otra partida entonces sale del bucle while
+			if (partidaTerminada()) {    // Si la partida ha terminado preguntamos si quiere jugar otra
+				if (!jugarOtraPartida()) // Pregunta por consola si jugar otra partida
+					break; 	// Si no se quiere jugar otra sale del bucle
+				nuevaPartida();
 			}
 
 		} // fin for
@@ -119,15 +103,13 @@ public class JuegoAhorcado {
 	 * varibles palabra, palabraParcial, y pinta por consola la horca inicial y el
 	 * patrón con guiones bajos de la palabra a descubrir
 	 * 
-	 * @return 0 si hemos pulsado S para jugar otra partida; -1 en caso contrario
+	 * @return true si hemos pulsado S para jugar otra partida; false en caso contrario
 	 */
 	private static boolean jugarOtraPartida() {
 		if (pideLetra("\n¿Quieres jugar otra partida? [S/N]: ") == 'S') {
-			nuevaPartida();
 			return true;
 		} else
 			return false;
-
 	}
 
 	/**
@@ -279,20 +261,35 @@ public class JuegoAhorcado {
 		System.out.print("Letras usadas: ");
 		System.out.println(letrasUtilizadas.toString());
 	}
+	
 
+	/**
+	 * Comprueba si un caracter es permitido para jugar.
+	 * Caracteres permitidos: A-Z; a-z; Ñ; ñ
+	 * @param l Carácter a comprobar
+	 * @return true si el caracter es permito; false en otro caso
+	 */
 	private static boolean letraPermitida(char l) {
-		if ((l >= '\u0041' && l <= '\u005A') || (l >= '\u0061' && l <= '\u007A') || l == '\u00D1' || l == '\u00F1') {
+		if ((l >= '\u0041' && l <= '\u005A') ||      // A-Z (sin Ñ)
+				(l >= '\u0061' && l <= '\u007A') ||  // a-z (sin ñ)
+				l == '\u00D1' || l == '\u00F1')      // Ñ, ñ
+		{
 			return true;
 		}
 		return false;
 	}
+	
+	/**
+	 * Carga la lista de palabras a descrubrir desde el fichero de recurso.
+	 */
 
 	static void cargaPalabras() {
 
 		InputStream is = JuegoAhorcado.class.getResourceAsStream("/palabras.txt");
 
 		/*
-		 * Otra forma de obtener referencia al ficnero de recurso. Es decir, de hacer lo mismo de arriba 
+		 * Otra forma de obtener referencia al fichero de recurso. 
+		 * Es decir, de hacer lo mismo de arriba 
 		 * 
 		 * ClassLoader loader = JuegoAhorcado.class.getClassLoader();
 		 * InputStream is=null; 
@@ -304,15 +301,15 @@ public class JuegoAhorcado {
 		 */
 
 		if (is != null) {
-			palabras = new ArrayList<>();
+			palabras = new ArrayList<>();  // Crea el arrayList para almacenar las parlabras
 			Scanner sc = new Scanner(is);
 
-			while (sc.hasNextLine())
-				palabras.add(sc.nextLine());
+			while (sc.hasNextLine())		// Mientras haya líneas que leer.
+				palabras.add(sc.nextLine());  // Cada palabra está en una línea del fichero
 
 			sc.close();
 		} else {
-			System.out.println("Fichro de recurso no existe o no se puede abrir: palabras.txt");
+			System.out.println("Fichero de recurso no existe o no se puede abrir: palabras.txt");
 		}
 
 	}
@@ -322,33 +319,37 @@ public class JuegoAhorcado {
 		if (is != null) {
 
 			Scanner sc = new Scanner(is);
+			// En linea se van pegando los trozos (líneas) de cada horca
 			StringBuilder linea = new StringBuilder();
 			String str;
+			
 			int i = -1; // pos del array de horcas
 
 			while (sc.hasNextLine()) {
 				str = sc.nextLine();
 				
-				if (str.length() == 0) continue;
+				if (str.length() == 0) continue;  // Si la línea esta en blanco pasa a la siguiente
 
-				if (str.charAt(0) == '@') {
+				if (str.charAt(0) == '@') {  // Caracter indicador de nueva horca.
 					if(i != -1) {
-						imagenesAhorcado[i] = linea.toString();
-						linea.setLength(0);
+						imagenesAhorcado[i] = linea.toString(); //Guarda el string de la horca
+						linea.setLength(0);  // Vacía el stringbuilder
 					}
 					
 					i++;
 				} else {
-					linea.append(str).append('\n');
+					// Añade siguiente línea de la misma horca.
+					// nexLine() no coge el salto de línea, por eso lo añadimos otra vez
+					linea.append(str).append('\n'); 
 				}
-			}
+			} // while
+			
 			imagenesAhorcado[i] = linea.toString();
 
 			sc.close();
+	
 		} else {
-			System.out.println("Fichro de recurso no existe o no se puede abrir: mapas_horcas.txt");
+			System.out.println("Fichero de recurso no existe o no se puede abrir: mapas_horcas.txt");
 		}
-
 	}
-
 }
