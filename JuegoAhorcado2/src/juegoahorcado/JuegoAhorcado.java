@@ -14,8 +14,6 @@ public class JuegoAhorcado {
 	
 	private static String[] imagenesAhorcado = new String[MAX_FALLOS + 1]; 
 
-	static final char[] saltos = new char[200];
-
 	static Scanner sc;
 
 	static ArrayList<String> palabras;
@@ -54,7 +52,7 @@ public class JuegoAhorcado {
 		else
 			sc = new Scanner(System.in);
 	
-		cargaMapasHorcas(); // Carga los strings conlas horcas desde el fichero de recurso.
+		cargaMapasHorcas(); // Carga los strings con las horcas desde el fichero de recurso.
 
 		cargaPalabras(); // Carga lista de palabras desde el fichero de recurso
 
@@ -264,10 +262,14 @@ public class JuegoAhorcado {
 	 * @return true si el caracter es permito; false en otro caso
 	 */
 	private static boolean letraPermitida(char l) {
-		if ((l >= '\u0041' && l <= '\u005A') ||      // A-Z (sin Ñ)
-				(l >= '\u0061' && l <= '\u007A') ||  // a-z (sin ñ)
-				l == '\u00D1' || l == '\u00F1')      // Ñ, ñ
+		if ((l >= 'A' && l <= 'Z') ||      // A-Z (sin Ñ)
+				(l >= 'a' && l <= 'z') ||  // a-z (sin ñ)
+				l == 'Ñ' || l == 'ñ')      // Ñ, ñ
 		{
+//		if ((l >= '\u0041' && l <= '\u005A') ||      // A-Z (sin Ñ)
+//				(l >= '\u0061' && l <= '\u007A') ||  // a-z (sin ñ)
+//				l == '\u00D1' || l == '\u00F1')      // Ñ, ñ
+//		{
 			return true;
 		}
 		return false;
@@ -314,31 +316,31 @@ public class JuegoAhorcado {
 
 			Scanner sc = new Scanner(is);
 			// En linea se van pegando los trozos (líneas) de cada horca
-			StringBuilder linea = new StringBuilder();
+			StringBuilder lineasHorca = new StringBuilder();
 			String str;
 			
 			int i = -1; // pos del array de horcas
 
 			while (sc.hasNextLine()) {
-				str = sc.nextLine();
+				str = sc.nextLine(); // Lee línea del fichero
 				
 				if (str.length() == 0) continue;  // Si la línea esta en blanco pasa a la siguiente
 
 				if (str.charAt(0) == '@') {  // Caracter indicador de nueva horca.
 					if(i != -1) {
-						imagenesAhorcado[i] = linea.toString(); //Guarda el string de la horca
-						linea.setLength(0);  // Vacía el stringbuilder
+						imagenesAhorcado[i] = lineasHorca.toString(); //Guarda el string de la horca
+						lineasHorca.setLength(0);  // Vacía el stringbuilder
 					}
 					
 					i++;
 				} else {
 					// Añade siguiente línea de la misma horca.
 					// nexLine() no coge el salto de línea, por eso lo añadimos otra vez
-					linea.append(str).append('\n'); 
+					lineasHorca.append(str).append('\n'); 
 				}
 			} // while
 			
-			imagenesAhorcado[i] = linea.toString();
+			imagenesAhorcado[i] = lineasHorca.toString();
 
 			sc.close();
 	
