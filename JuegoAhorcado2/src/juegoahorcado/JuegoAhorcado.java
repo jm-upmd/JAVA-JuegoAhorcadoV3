@@ -3,7 +3,6 @@ package juegoahorcado;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 import java.util.TreeSet;
 
@@ -266,6 +265,7 @@ public class JuegoAhorcado {
 				(l >= 'a' && l <= 'z') ||  // a-z (sin ñ)
 				l == 'Ñ' || l == 'ñ')      // Ñ, ñ
 		{
+//    Lo mismo pero utilizando el codigo unicode del caracter			
 //		if ((l >= '\u0041' && l <= '\u005A') ||      // A-Z (sin Ñ)
 //				(l >= '\u0061' && l <= '\u007A') ||  // a-z (sin ñ)
 //				l == '\u00D1' || l == '\u00F1')      // Ñ, ñ
@@ -282,19 +282,6 @@ public class JuegoAhorcado {
 	static void cargaPalabras() {
 
 		InputStream is = JuegoAhorcado.class.getResourceAsStream("/palabras.txt");
-
-		/*
-		 * Otra forma de obtener referencia al fichero de recurso. 
-		 * Es decir, de hacer lo mismo de arriba 
-		 * 
-		 * ClassLoader loader = JuegoAhorcado.class.getClassLoader();
-		 * InputStream is=null; 
-		 * try { 
-		 * 	is = loader.getResource("palabras.txt").openStream(); 
-		 * } catch (IOException e) { 
-		 * 	e.printStackTrace(); 
-		 * }
-		 */
 
 		if (is != null) {
 			palabras = new ArrayList<>();  // Crea el arrayList para almacenar las parlabras
