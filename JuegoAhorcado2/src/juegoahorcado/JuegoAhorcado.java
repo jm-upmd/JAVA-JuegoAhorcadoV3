@@ -46,8 +46,7 @@ public class JuegoAhorcado {
 		// Crea scanner si le damos charset como parametro lo utiliza en vez del de por
 		// defecto
 
-		if (args.length > 0)
-			sc = new Scanner(System.in);
+		sc = new Scanner(System.in);
 	
 		cargaMapasHorcas(); // Carga los strings con las horcas desde el fichero de recurso.
 
