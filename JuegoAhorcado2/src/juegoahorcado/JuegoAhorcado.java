@@ -43,9 +43,6 @@ public class JuegoAhorcado {
 
 		letrasUtilizadas = new TreeSet<>(); // Crea colección para guardar letras utilizadas.
 
-		// Crea scanner si le damos charset como parametro lo utiliza en vez del de por
-		// defecto
-
 		sc = new Scanner(System.in);   
 	
 		cargaMapasHorcas(); // Carga los strings con las horcas desde el fichero de recurso.
