@@ -47,8 +47,6 @@ public class JuegoAhorcado {
 		// defecto
 
 		if (args.length > 0)
-			sc = new Scanner(System.in, args[0]);
-		else
 			sc = new Scanner(System.in);
 	
 		cargaMapasHorcas(); // Carga los strings con las horcas desde el fichero de recurso.
@@ -314,11 +312,10 @@ public class JuegoAhorcado {
 				if (str.length() == 0) continue;  // Si la línea esta en blanco pasa a la siguiente
 
 				if (str.charAt(0) == '@') {  // Caracter indicador de nueva horca.
-					if(i != -1) {
+					if(i != -1) {  		// Si no es la primera línea
 						imagenesAhorcado[i] = lineasHorca.toString(); //Guarda el string de la horca
 						lineasHorca.setLength(0);  // Vacía el stringbuilder
 					}
-					
 					i++;
 				} else {
 					// Añade siguiente línea de la misma horca.
